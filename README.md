@@ -1,6 +1,6 @@
 # Aggressor-NTFY
 
-A simple, headless Aggressor Script for all red team members to receive Beacon notifications.
+A simple, headless aggressor script for red teams to receive beacon notifications.
 
 ![ntfy](https://github.com/user-attachments/assets/37900d94-71ae-4ee5-b4f8-3dfb9ceca869)
 
@@ -10,7 +10,7 @@ A simple, headless Aggressor Script for all red team members to receive Beacon n
 2. On the teamserver, execute the `Aggressor-NTFY.cna` script using the `agscript` utility:
 
 ```sh
-./agscript [teamserver-ip] [teamserver-port] [NTFY] [password] ntfy.cna
+./agscript [teamserver-ip] [teamserver-port] [NTFY] [password] Aggressor-NTFY.cna
 ./agscript 127.0.0.1 50050 NTFY s3cret Aggressor-NTFY.cna
 ```
 
