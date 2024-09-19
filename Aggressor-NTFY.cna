@@ -1,7 +1,9 @@
 # Name: Aggressor-NTFY.cna
 # Author: @infosecnoodle
 # Date: 14/09/2024
+# Requires: curl
 
+# generate a random string to use for the subscription
 sub random_subscription {
     $word_length = 5;
     $word_count = 3;
@@ -21,8 +23,9 @@ sub random_subscription {
 }
 
 global ('$ntfy-subscription');
-
 $ntfy-subscription = random_subscription();
+
+# OPSEC: ideally, change this to your own ntfy server
 $ntfy-url = "https://ntfy.sh/";
 
 # event viewer cmds
@@ -34,13 +37,14 @@ on event_public {
         $cmd = @input[0];
         @args = sublist(@input, 1);
 
+        # parse arguments
         if ($cmd eq "/ntfy") {
             if (size(@args) == 0) {
                 say("- NTFY --------------------------------------------------------------------------------------");
-                say(" \cC/ntfy                                      View the help menu.");
-                say(" \cC/ntfy view                                 View the current ntfy subscription string.");
-                say(" \cC/ntfy test                                 Send a test notification.");
-                say(" \cC/ntfy set [subscription]                   Set the ntfy subscription string.");
+                say(" \c9/ntfy                                      View the help menu.");
+                say(" \c9/ntfy view                                 View the current ntfy subscription string.");
+                say(" \c9/ntfy test                                 Send a test notification.");
+                say(" \c9/ntfy set [subscription]                   Set the ntfy subscription string.");
                 say("---------------------------------------------------------------------------------------------");
             }
             else if (size(@args) == 1 && @args[0] eq "view") {
@@ -61,12 +65,14 @@ on event_public {
     }
 }
 
+# send a test notification to verify it works
 sub ntfy-test {
     $message = "Hello from Cobalt Strike!";
 	  @command = @('curl', '-d', $message, ($ntfy-url . $ntfy-subscription));
 	  exec(@command);
 }
 
+# normal beacons
 on beacon_initial {
     $computer = beacon_info($1, "computer");
     $external = beacon_info($1, "external");
@@ -75,19 +81,30 @@ on beacon_initial {
     $user = beacon_info($1, "user");
     $pid = beacon_info($1, "pid");
     $process = beacon_info($1, "process");
-  
+
     if (-isadmin $1) {
-        $message = "New Beacon! $computer as $user in $process \(pid: $pid\)";
+        $message = "New Admin Beacon! $computer as $user in $process \(pid: $pid\)";
     }
     else {
-        $message = "New Admin Beacon! $computer as $user in $process \(pid: $pid\)";
+        $message = "New Beacon! $computer as $user in $process \(pid: $pid\)";
     }
     @command = @('curl', '-d', $message, ($ntfy-url . $ntfy-subscription));
     exec(@command);
 }
 
+# ghost beacons
 on beacon_initial_empty {
     $message = "New Ghost (DNS) Beacon!";
+    @command = @('curl', '-d', $message, ($ntfy-url . $ntfy-subscription));
+    exec(@command);
+}
+
+# ssh beacons
+on ssh_initial {
+    $computer = beacon_info($1, "computer");
+    $internal = beacon_info($1, "internal");
+    $user = beacon_info($1, "user");
+    $message = "New SSH Beacon! $computer as $user";
     @command = @('curl', '-d', $message, ($ntfy-url . $ntfy-subscription));
     exec(@command);
 }
@@ -104,5 +121,5 @@ VP   V8P    YP    YP         YP
 
 Using randomly-generated subscription: \c9$ntfy-subscription\o
 
-Use \cC/ntfy\o to see the list of available commands.
+Use \c9/ntfy\o to see the list of available commands.
 ");
