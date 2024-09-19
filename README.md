@@ -1,18 +1,15 @@
 # Aggressor-NTFY
 
-A simple, headless aggressor script for red teams to receive beacon notifications.
+Cobalt Strike beacon notifications using the [NTFY](https://ntfy.sh) app.
 
-![ntfy](https://github.com/user-attachments/assets/37900d94-71ae-4ee5-b4f8-3dfb9ceca869)
+Runs in headless mode with [agscript](https://hstechdocs.helpsystems.com/manuals/cobaltstrike/current/userguide/content/topics_aggressor-scripts/as_intro3_headless-cobalt-strike.htm) to ensure consistent notification delivery.
 
-## Usage
+![ntfy](https://github.com/user-attachments/assets/56b22263-2684-4369-ac62-41e73afae200)
 
-1. Download the [ntfy](https://ntfy.sh) app (available for iOS, Android or web-based)
-2. On the teamserver, execute the `Aggressor-NTFY.cna` script using the `agscript` utility:
+## Instructions
 
-```sh
-./agscript [teamserver-ip] [teamserver-port] [NTFY] [password] Aggressor-NTFY.cna
-./agscript 127.0.0.1 50050 NTFY s3cret Aggressor-NTFY.cna
-```
-
-3. Join the teamserver and view the randomly generated subscription string (or set your own)
-4. Add the subsription to your ntfy app and test with the `/ntfy test` command in the event log.
+1. Save `Aggressor-NTFY.cna` to your Cobalt Strike teamserver.
+2. Run: `./agscript [cs-ip] [cs-port] NTFY [cs-password] Aggressor-NTFY.cna`
+3. View generated subscription in Event Log: `/ntfy view` (or set with `/ntfy set`)
+4. Add the subscription to your NTFY app (iOS, Android, Desktop).
+5. Test with: `/ntfy test`
