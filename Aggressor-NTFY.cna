@@ -109,6 +109,13 @@ on ssh_initial {
     exec(@command);
 }
 
+# system profiler
+on profiler_hit {
+    $message = "Profiler hit! IP: $1";
+    @command = @('curl', '-d', $message, ($ntfy-url . $ntfy-subscription));
+    exec(@command);
+}
+
 say("
 
 d8b   db d888888b d88888b db    db
